@@ -25,7 +25,7 @@ app.use('/api/agents', AgentRoutes);
 app.use('/api/regions', RegionRoutes);
 
 // Import and open MongoDB connection
-const MongoManager = require('../mongo.db/mongo-manager');
+const MongoManager = require('./mongo.db/mongo-manager');
 MongoManager.openMongoConnection();
 
 // Start the server and listen on the specified port
