@@ -1,19 +1,32 @@
-// Middleware to check for a valid access token in the Authorization header
+// Import jsonwebtoken for JWT verification
+const jwt = require('jsonwebtoken');
 
-// Hard-coded access key (token)
-const ACCESS_KEY = 'RocketSecretKey123';
+// Secret key for signing/verifying JWTs (in real apps, use env variable)
+const JWT_SECRET = 'RocketJWTSecretKey123';
 
-// Middleware function to authenticate requests
+// Middleware function to authenticate requests using JWT
 function authenticateToken(req, res, next) {
   // Get the value of the 'Authorization' header
   const authHeader = req.headers['authorization'];
-  // Check if the header exists and matches the access key
-  if (authHeader && authHeader === ACCESS_KEY) {
-    // If valid, proceed to the next middleware or route handler
-    return next();
+  // Check if the header exists and starts with 'Bearer '
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    // Extract the token from the header
+    const token = authHeader.split(' ')[1];
+    // Verify the token
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+      if (err) {
+        // If verification fails, return Access Forbidden
+        return res.status(403).json({ error: 'Access Forbidden' });
+      }
+      // Attach user info to request (optional)
+      req.user = user;
+      // Proceed to next middleware or route handler
+      next();
+    });
+  } else {
+    // If no valid Authorization header, return Access Forbidden
+    return res.status(403).json({ error: 'Access Forbidden' });
   }
-  // If not valid, return Access Forbidden error
-  return res.status(403).json({ error: 'Access Forbidden' });
 }
 
 // Export the middleware function
